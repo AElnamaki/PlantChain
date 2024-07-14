@@ -39,13 +39,6 @@ class GenChain:
             )
             self.chain.append(genesis_block)
 
-    def create_genesis_block(self) -> None:
-        """
-        Creates the genesis block (first block in the blockchain).
-        """
-        genesis_block = Block.create_genesis_block(self.name, self.description)
-        self.chain.append(genesis_block)
-
     def add_block(self, block: GenChainBlock) -> None:
         self.chain.append(block)
 
