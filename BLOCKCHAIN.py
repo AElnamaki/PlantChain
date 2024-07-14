@@ -85,7 +85,6 @@ class GenChain:
             block_summaries.append({
                 "index": block.index,
                 "timestamp": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(block.timestamp)),
-                "block_type": block.block_type,
                 "dna_sequence": block.dna_sequence,
                 "previous_hash": block.previous_hash,
                 "hash": block.hash,
@@ -102,7 +101,6 @@ class GenChain:
             return {
                 "index": block.index,
                 "timestamp": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(block.timestamp)),
-                "block_type": block.block_type,
                 "dna_sequence": block.dna_sequence,
                 "previous_hash": block.previous_hash,
                 "hash": block.hash,
@@ -159,16 +157,21 @@ class Blockchain:
     def generate_gen_chain_blocks(self):
         while self.running:
             time.sleep(2)
-            # Example: Fetch block_data and previous_hash from pending data and last block in GenChain
             if not self.gen_chain.chain:
-                previous_hash = ""
+                previous_hash = "0" * 64
             else:
                 previous_hash = self.gen_chain.chain[-1].hash
-            
-            # Example: Construct block_data from pending data or other sources
-            block_data = "Example block data"  # Replace with appropriate logic to get block data
 
-            new_block = self.gen_chain.mine_block(block_data, previous_hash)
+            if self.chain:
+                latest_block = self.chain[-1]
+                block_data = json.dumps(latest_block.to_dict())
+            else:
+                block_data = "No blocks in main chain"
+
+            binary_data = ''.join(format(ord(char), '08b') for char in block_data)
+            dna_sequence = self.gen_chain.tokenize_to_dna(binary_data)
+
+            new_block = self.gen_chain.mine_block(dna_sequence, previous_hash)
             self.gen_chain.add_block(new_block)
             logger.debug(f"Generated new GenChain block at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
 

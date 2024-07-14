@@ -97,6 +97,5 @@ class GenChainBlock:
             "previous_hash": self.previous_hash,
             "timestamp": self.timestamp,
             "dna_sequence": self.dna_sequence,
-            "block_type": self.block_type,
             "hash": self.hash
         }
