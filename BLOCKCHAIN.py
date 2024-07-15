@@ -139,27 +139,54 @@ class Blockchain:
 
 
     def generate_gen_chain_blocks(self):
-        while self.running:
-            time.sleep(2)
-            if not self.gen_chain.chain:
-                previous_hash = "0" * 64
-            else:
-                previous_hash = self.gen_chain.chain[-1].hash
+        try:
+            while self.running:
+                time.sleep(2)
+                
+                if not self.gen_chain.chain:
+                    previous_hash = "0" * 64
+                    print("No blocks in genetic chain. Setting previous_hash to all zeros.")
+                else:
+                    previous_hash = self.gen_chain.chain[-1].hash
+                    print(f"Previous hash set to last block hash in genetic chain: {previous_hash}")
 
-            if self.chain:
-                latest_block = self.chain[-1]
-                block_data = json.dumps(latest_block.to_dict())
-            else:
-                block_data = "No blocks in main chain"
+                if self.chain:
+                    latest_block = self.chain[-1]
+                    block_data = json.dumps(latest_block.to_dict())
+                    # print(f"Latest block in main chain: {block_data}")
+                else:
+                    block_data = "No blocks in main chain"
+                    print("No blocks in main chain")
 
-            binary_data = ''.join(format(ord(char), '08b') for char in block_data)
-            dna_sequence = self.gen_chain.tokenize_to_dna(binary_data)
+                try:
+                    # Calculate hash of block data
+                    block_data_hash = sha256(block_data.encode()).hexdigest()
+                    print(f"Hash of block data: {block_data_hash}")
 
-            new_block = self.gen_chain.mine_block(dna_sequence, previous_hash)
-            self.gen_chain.add_block(new_block)
-            dna_icon = "🧬"
-            dna_preview = dna_sequence[:10]
-            logger.debug(Fore.GREEN + f"Generated new Gen block {dna_icon} {dna_preview}  at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}" + Style.RESET_ALL)
+                    # Concatenate block data hash and block data itself
+                    concatenated_data = f"{block_data_hash}{block_data}"
+                    
+                    binary_data = ''.join(format(ord(char), '08b') for char in concatenated_data)
+
+                    # Tokenize binary data to DNA sequence
+                    dna_sequence = self.gen_chain.tokenize_to_dna(binary_data)
+                    # print(f"Generated DNA sequence: {dna_sequence}")
+
+                    new_block = self.gen_chain.mine_block(dna_sequence, previous_hash)
+
+                    self.gen_chain.add_block(new_block)
+                    # print(f"Added new block to genetic chain: {new_block}")
+
+                    dna_icon = "🧬"
+                    logger.debug(Fore.GREEN + f"Generated new {dna_icon} at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}" + Style.RESET_ALL)
+
+                except Exception as e:
+                    logger.error(f"Error generating genetic chain block: {str(e)}")
+                    print(f"Error generating genetic chain block: {str(e)}")
+
+        except Exception as e:
+            logger.error(f"Unexpected error in generate_gen_chain_blocks: {str(e)}")
+            print(f"Unexpected error in generate_gen_chain_blocks: {str(e)}")
 
 
     def create_block(self, data: Dict[str, List[DataEntry]], block_type: str, previous_hash: str) -> Block:
