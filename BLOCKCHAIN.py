@@ -157,7 +157,9 @@ class Blockchain:
 
             new_block = self.gen_chain.mine_block(dna_sequence, previous_hash)
             self.gen_chain.add_block(new_block)
-            logger.debug(Fore.GREEN + f"Generated new GenChain block at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}" + Style.RESET_ALL)
+            dna_icon = "🧬"
+            dna_preview = dna_sequence[:10]
+            logger.debug(Fore.GREEN + f"Generated new Gen block {dna_icon} {dna_preview}  at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}" + Style.RESET_ALL)
 
 
     def create_block(self, data: Dict[str, List[DataEntry]], block_type: str, previous_hash: str) -> Block:
