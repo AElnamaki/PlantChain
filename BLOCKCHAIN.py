@@ -129,16 +129,9 @@ class Blockchain:
         """
         Creates the genesis block (first block in the blockchain).
         """
-        genesis_block = Block(
-            index=0,
-            previous_hash="",
-            timestamp=time.time(),
-            data=[],
-            block_type="genesis",
-            hash="",
-            public_keys=[]
-        )
+        genesis_block = Block.create_genesis_block(self.name, self.description)
         self.chain.append(genesis_block)
+
 
     def generate_gen_chain_blocks(self):
         while self.running:
