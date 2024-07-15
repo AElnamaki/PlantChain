@@ -10,6 +10,11 @@ from DATAENTERY import DiseaseReport, SciencePaper, Dataset, DataEntry
 from crypto_utils import generate_key_pair, sign_data, verify_signature
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, load_pem_public_key
 from cryptography.hazmat.backends import default_backend
+from colorama import Fore, Style 
+
+# Initialize colorama
+Fore.GREEN = '\033[92m'  # Define green color for console output
+Style.RESET_ALL = '\033[0m'  # Reset colorama style
 
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -152,7 +157,7 @@ class Blockchain:
 
             new_block = self.gen_chain.mine_block(dna_sequence, previous_hash)
             self.gen_chain.add_block(new_block)
-            logger.debug(f"Generated new GenChain block at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+            logger.debug(Fore.GREEN + f"Generated new GenChain block at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}" + Style.RESET_ALL)
 
 
     def create_block(self, data: Dict[str, List[DataEntry]], block_type: str, previous_hash: str) -> Block:
