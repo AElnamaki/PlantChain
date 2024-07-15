@@ -105,7 +105,7 @@ class GenChain:
         return f"GenChain(name={self.name}, description={self.description}, chain_length={len(self.chain)})"
 
 class Blockchain:
-    def __init__(self, name: str, description: str = "", version: float = 1.00, gen_chain: bool = True) -> None:
+    def __init__(self, name: str, description: str = "", version: float = 1.00, gen_chain: bool = False) -> None:
         self.name: str = name
         self.description: str = description
         self.chain: List[Block] = []
@@ -163,7 +163,7 @@ class Blockchain:
 
     def add_block(self, data: Dict[str, List[DataEntry]], block_type: str) -> Block:
         previous_block = self.chain[-1]
-        new_block = self.create_block(data, block_type, previous_block.hash)
+        new_block = self.create_block(data, block_type, previous_block.hash_value)
         self.chain.append(new_block)
         return new_block
 
@@ -171,7 +171,7 @@ class Blockchain:
         """
         Mines the pending data into a new block.
         """
-        while not self.pending_data.empty():
+        if not self.pending_data.empty():
             data_entries = {}
             while len(data_entries) < 1000 and not self.pending_data.empty():  # Assuming a block can hold up to 1000 public key entries
                 public_key, entry = self.pending_data.get()
@@ -179,16 +179,20 @@ class Blockchain:
                     data_entries[public_key] = []
                 data_entries[public_key].append(entry)
             if data_entries:
-                self.add_block(data_entries, "data")
+                new_block = self.add_block(data_entries, "data")
+                logger.debug(f"Generated new block with index {new_block.index} and hash {new_block.hash_value} at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
 
     def generate_empty_block(self) -> None:
         """
-        Generates a new block every 2 seconds.
+        Generates an empty block every 2 seconds if there are no pending data entries.
         """
         while self.running:
             time.sleep(2)
-            self.mine_pending_data()
-            logger.debug(f"Generated new block at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+            if self.pending_data.empty():
+                previous_block = self.chain[-1]
+                empty_block = self.create_block({}, "empty", previous_block.hash_value)
+                self.chain.append(empty_block)
+                logger.debug(f"Generated new empty block with index {empty_block.index} and hash {empty_block.hash_value} at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
 
     def start_block_generation(self) -> None:
         """
@@ -213,11 +217,11 @@ class Blockchain:
             current_block = self.chain[i]
             previous_block = self.chain[i - 1]
 
-            if current_block.hash != Block.hash_block(current_block.index, previous_block.hash, current_block.timestamp, current_block.data, current_block.block_type, current_block.public_keys):
+            if current_block.hash_value != Block.hash_block(current_block.index, previous_block.hash_value, current_block.timestamp, current_block.data, current_block.block_type, current_block.public_keys):
                 logger.error(f"Block {current_block.index} hash mismatch detected.")
                 return False
 
-            if current_block.previous_hash != previous_block.hash:
+            if current_block.previous_hash != previous_block.hash_value:
                 logger.error(f"Block {current_block.index} previous hash mismatch detected.")
                 return False
 
@@ -269,7 +273,7 @@ class Blockchain:
                 "block_type": block.block_type,
                 "data_count": sum(len(entries) for entries in block.data.values()),
                 "previous_hash": block.previous_hash,
-                "hash": block.hash,
+                "hash": block.hash_value,
                 "creator": block.creator,
                 "description": block.description,
                 "additional_info": block.additional_info
