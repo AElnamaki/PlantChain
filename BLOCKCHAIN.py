@@ -159,16 +159,14 @@ class Blockchain:
                     print("No blocks in main chain")
 
                 try:
-                    # Calculate hash of block data
                     block_data_hash = sha256(block_data.encode()).hexdigest()
                     print(f"Hash of block data: {block_data_hash}")
 
-                    # Concatenate block data hash and block data itself
                     concatenated_data = f"{block_data_hash}{block_data}"
                     
                     binary_data = ''.join(format(ord(char), '08b') for char in concatenated_data)
 
-                    # Tokenize binary data to DNA sequence
+                    #  B2DNA
                     dna_sequence = self.gen_chain.tokenize_to_dna(binary_data)
                     # print(f"Generated DNA sequence: {dna_sequence}")
 
