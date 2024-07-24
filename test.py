@@ -78,9 +78,6 @@ if __name__ == "__main__":
     # Create a blockchain instance
     blockchain = Blockchain(name="Test Blockchain", description="A blockchain for testing", gen_chain=True)
 
-    # Create a blockchain instance
-    blockchain = Blockchain(name="Test Blockchain", description="A blockchain for testing", gen_chain=True)
-
     # Create a new block on the main chain 
     new_block = Block(
         index=1,
