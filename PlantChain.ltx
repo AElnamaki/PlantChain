@@ -39,7 +39,32 @@ In this paper, we discuss the mathematical concepts and functions underlying RSA
 
 By demonstrating the implementation details and applications of blockchain technology in data management, this paper aims to showcase its potential in enhancing security, integrity, and efficiency across plant science field , and beyond.
 
-\section{RSA Encryption and Signing}
+\section{Plant Chain}
+
+\subsection{Blockchain}
+
+The \texttt{Blockchain} serves as the core framework for securely managing data operations within the system.such as plant diseases, scientific research, and beneficial datasets. The chain is meticulously designed to user contributions, enabling the reporting of plant diseases, submission of plant-related research, and sharing datasets crucial for biologists and plant scientists . This ensures a robust platform for collaborative knowledge exchange and comprehensive plant science advancements.
+
+\subsubsection{Functionality}
+
+\begin{itemize}
+    \item **Chain Operations**: The \texttt{Blockchain} facilitates seamless block management operations, including block creation, validation, and chain traversal. Each block in the chain is linked sequentially, with each block containing a cryptographic hash of the previous block, ensuring the integrity of the entire chain.
+    
+    \item **Data Storage**: It provides robust mechanisms for storing diverse data types such as disease reports, scientific papers, datasets, and translated genetic information. Each block within the chain can encapsulate multiple data entries, allowing for efficient and organized data management.
+    
+    \item **Cryptographic Validation**: Utilizing cryptographic methods such as SHA-256 hashing and RSA encryption, the \texttt{Blockchain} class ensures that each block's contents are securely hashed and validated. This cryptographic validation guarantees the authenticity and immutability of stored data, preventing tampering and unauthorized modifications.
+    
+    \item **Continuous Block Generation**: Through continuous block generation, the \texttt{Blockchain} class supports the dynamic addition of new data entries to the chain. This feature enables real-time data updates and enhances the chain's utility in applications requiring up-to-date information, such as disease surveillance and research collaborations.
+    
+    \item **B2DNA**: The system includes a unique feature serves as alternative chain  called the GenChain, which tokenizes binary data into DNA sequences. This process, we call it B2DNA, facilitates the storage of potentially billions of data entries in a highly compact and efficient manner on the GenChain. By converting binary data into DNA sequences, the GenChain enhances data storage capabilities, ensuring that vast amounts of information can be preserved and accessed securely.
+    
+\end{itemize}
+
+\section{Components}
+
+    
+
+\subsection{RSA Encryption and Signing}
 
 \subsubsection{Key Pair Generation}
 
@@ -69,7 +94,7 @@ The public key consists of \( (e, n) \) and the private key consists of \( (d, n
 
 \subsubsection{Private Key Serialization}
 
-The private key \( (d, n) \) is serialized to PEM format using PKCS8 without encryption. This allows for secure storage and transfer of the private key in a standard format.
+The private key \( (d, n) \) is serialized to PEM format using PKCS8.
 
 \subsubsection{Public Key Serialization}
 
@@ -103,125 +128,483 @@ PSS padding is used during verification to ensure the integrity of the hash func
 \text{PSS padding} = \text{PSS}(\text{hash}(data))
 \end{equation}
 
-\section{SHA-256 Hashing Algorithm}
 
-\subsection{Message Padding and Parsing}
 
-SHA-256 processes the padded message \( M \) in 512-bit blocks:
 
+
+
+\subsection{Block}
+
+The \texttt{Block} class is a set \( B \), where each instance \( b \in B \) is a tuple containing the attributes of the class:
 \begin{equation}
-M_{\text{padded}} = \text{pad}(M)
+b = \left( i, h_{\text{prev}}, t, d, b_{\text{type}}, k_{\text{public}}, h, c, \text{desc}, \text{info} \right)
 \end{equation}
+where:
+\begin{align*}
+i & : \text{index (integer)} \in \mathbb{Z} \\
+h_{\text{prev}} & : \text{previous\_hash (string)} \in \Sigma^* \\
+t & : \text{timestamp (float)} \in \mathbb{R} \\
+d & : \text{data (list of elements)} \in \mathcal{P}(D) \\
+b_{\text{type}} & : \text{block\_type (string)} \in \Sigma^* \\
+k_{\text{public}} & : \text{public\_keys (list of strings)} \in \mathcal{P}(\Sigma^*) \\
+h & : \text{hash\_value (string)} \in \Sigma^* \\
+c & : \text{creator (string)} \in \Sigma^* \\
+\text{desc} & : \text{description (string)} \in \Sigma^* \\
+\text{info} & : \text{additional\_info (dictionary)} \in \mathcal{F}(\Sigma^*, \mathcal{A})
+\end{align*}
 
-The padded message \( M_{\text{padded}} \) is divided into 512-bit blocks for processing.
+Thus, the set \( B \) of all possible blocks is defined as:
 
-\subsection{Message Schedule}
+\[
 
-Each 512-bit block is divided into 16 32-bit words, which are then extended to 64 words:
+B = \left\{ \left( i, h_{\text{prev}}, t, d, b_{\text{type}}, k_{\text{public}}, h, c, \text{desc}, \text{info} \right) \mid \right. & 
+i \in \mathbb{Z}, & \; h_{\text{prev}} \in \Sigma^*, \; t \in \mathbb{R}, \; d \in \mathcal{P}(D), 
+b_{\text{type}} \in \Sigma^*, & \; k_{\text{public}} \in \mathcal{P}(\Sigma^*), \; h \in \Sigma^*, 
+c \in \Sigma^*, & \; \text{desc} \in \Sigma^*, \; \text{info} \in \mathcal{F}(\Sigma^*, \mathcal{A})
+\left. \right\}
 
+\]
 \begin{equation}
-W_t^i = \begin{cases} 
-M_t^i & \text{for } 0 \leq i < 16 \\
-\sigma_1(W_{t-2}^i) + W_{t-7}^i + \sigma_0(W_{t-15}^i) + W_{t-16}^i & \text{for } 16 \leq i < 64 
+\end{equation}
+\item { Block Constructor }
+
+\[
+\text{init}: \mathbb{Z} \times \Sigma^* \times \mathbb{R} \times \mathcal{P}(D) \times \Sigma^* \times \mathcal{P}(\Sigma^*) \times \Sigma^* \times \Sigma^* \times \Sigma^* \times \mathcal{F}(\Sigma^*, \mathcal{A}) \to B
+\]
+\begin{equation}
+\end{equation}
+This function takes the inputs (corresponding to the parameters of the constructor) and produces an element \( b \in B \).
+
+\item {Block Representation}
+\[
+\text{to\_dict}: B \to \mathcal{F}(\Sigma^*, \mathcal{A})
+\]
+
+Given an instance \( b = \left( i, h_{\text{prev}}, t, d, b_{\text{type}}, k_{\text{public}}, h, c, \text{desc}, \text{info} \right) \), the dictionary representation is:
+\begin{equation}
+\end{equation}
+\[
+\text{to\_dict}(b) = \left\{ 
+\begin{aligned}
+&\text{"index"} &\mapsto i, \\
+&\text{"previous\_hash"} &\mapsto h_{\text{prev}}, \\
+&\text{"timestamp"} &\mapsto t, \\
+&\text{"data"} &\mapsto \left\{ d_1, d_2, \dots, d_n \right\}, \\
+&\text{"block\_type"} &\mapsto b_{\text{type}}, \\
+&\text{"public\_keys"} &\mapsto k_{\text{public}}, \\
+&\text{"hash\_value"} &\mapsto h, \\
+&\text{"creator"} &\mapsto c, \\
+&\text{"description"} &\mapsto \text{desc}, \\
+&\text{"additional\_info"} &\mapsto \text{info}
+\end{aligned}
+\right\}
+\]
+
+
+\item { Serialization of Data}
+
+Given the block \( b = \left( i, h_{\text{prev}}, t, d, b_{\text{type}}, k_{\text{public}}, h, c, \text{desc}, \text{info} \right) \), the serialized data string \( S_d \) can be defined as:
+
+\[
+S_d = \begin{cases} 
+\text{to\_dict}(d_i), & \text{if } d_i \text{ has the method \texttt{to\_dict}} \\
+\text{dict}(d_i), & \text{otherwise}
 \end{cases}
+\]
+\begin{equation}
 \end{equation}
 
-\subsection{Compression Function}
+Where \( S_d \) is the serialization of each entry \( d_i \) in the data list \( d \).
 
-For each 512-bit block \( M_t \):
+The full serialized block string \( S_b \) is then given by:
 
-\begin{align}
-& \text{Initialize } H_0^t, H_1^t, \ldots, H_7^t \\
-& \text{For } t = 0 \text{ to } 63: \\
-& \quad a = H_0^t, b = H_1^t, c = H_2^t, d = H_3^t, e = H_4^t, f = H_5^t, g = H_6^t, h = H_7^t \\
-& \quad \text{Compute } T_1 = h + \Sigma_1(e) + \text{Ch}(e,f,g) + K_t + W_t \\
-& \quad \text{Compute } T_2 = \Sigma_0(a) + \text{Maj}(a,b,c) \\
-& \quad h = g \\
-& \quad g = f \\
-& \quad f = e \\
-& \quad e = d + T_1 \\
-& \quad d = c \\
-& \quad c = b \\
-& \quad b = a \\
-& \quad a = T_1 + T_2
-\end{align}
+\[
+S_b = \text{str}(i) + h_{\text{prev}} + \text{str}(t) + \text{concat}(S_d) + b_{\text{type}} + \text{json}(k_{\text{public}}) + c + \text{desc} + \text{json}(\text{info})
+\]
+\begin{equation}
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item \(\text{str}(\cdot)\) converts the input to a string.
+    \item \(\text{concat}(S_d)\) concatenates all serialized entries \( S_d \).
+    \item \(\text{json}(\cdot)\) converts the list or dictionary to a JSON string.
+\end{itemize}
+
+\item { Hashing }
+
+The hash function \( H \) using SHA-256 is defined as:
+
+\[
+H(x) = \text{SHA-256}(x)
+\]
+\begin{equation}
+\end{equation}
+Finally, the block hash \( h \) is computed as:
+
+\[
+h = H(S_b)
+\]
+\begin{equation}
+\end{equation}
+Thus, the \texttt{calculate\_hash} method is represented as:
+
+\[
+\text{calculate\_hash}(b) = H\left( \text{str}(i) + h_{\text{prev}} + \text{str}(t) + \text{concat}(S_d) + b_{\text{type}} + \text{json}(k_{\text{public}}) + c + \text{desc} \\  + \text{json}(\text{info}) \right)
+\]
+\begin{equation}
+\end{equation}
+
+
+\subsection{GENE CHAIN BLOCK}
+
+Represented as a set \( G \), where each instance \( g \in G \) is a tuple containing the attributes of the class:
+
+\[
+g = \left( i, h_{\text{prev}}, t, s_{\text{dna}}, h \right)
+\]
+\begin{equation}
+\end{equation}
+where:
+\begin{align*}
+i & : \text{index (integer)} \in \mathbb{Z} \\
+h_{\text{prev}} & : \text{previous\_hash (string)} \in \Sigma^* \\
+t & : \text{timestamp (float)} \in \mathbb{R} \\
+s_{\text{dna}} & : \text{dna\_sequence (string)} \in \Sigma^* \\
+h & : \text{hash\_value (string)} \in \Sigma^*
+\end{align*}
+
+Thus, the set \( G \) of all possible genetic chain blocks is defined as:
+
+\[
+G = \left\{ \left( i, h_{\text{prev}}, t, s_{\text{dna}}, h \right) \mid i \in \mathbb{Z}, h_{\text{prev}} \in \Sigma^*, t \in \mathbb{R}, s_{\text{dna}} \in \Sigma^*, h \in \Sigma^* \right\}
+\]
+\begin{equation}
+\end{equation}
+\item { Block Constructor }
+
+
+\[
+\text{init}: \mathbb{Z} \times \Sigma^* \times \mathbb{R} \times \Sigma^* \times \Sigma^* \to G
+\]
+\begin{equation}
+\end{equation}
+\item {Representation}
+
+
+\[
+\text{to\_dict}: G \to \mathcal{F}(\Sigma^*, \mathcal{A})
+\]
+\begin{equation}
+\end{equation}
+Given an instance \( g = \left( i, h_{\text{prev}}, t, s_{\text{dna}}, h \right) \), the dictionary representation is:
+
+\[
+\text{to\_dict}(g) = \left\{ 
+\begin{aligned}
+&\text{"index"} &\mapsto i, \\
+&\text{"previous\_hash"} &\mapsto h_{\text{prev}}, \\
+&\text{"timestamp"} &\mapsto t, \\
+&\text{"dna\_sequence"} &\mapsto s_{\text{dna}}, \\
+&\text{"hash"} &\mapsto h
+\end{aligned}
+\right\}
+\]
+
+
+\section{Data Structures and Definitions}
+
+\subsection*{ DataEntry }
+Our blockchain framework securely manages diverse data types critical for agricultural and scientific research. This includes detailed disease reports, scientific papers, and datasets, each structured to ensure integrity and accessibility.
+
+
+
+
+
+
+
+
+Define the set of data entries \( E \) as:
+
+\[
+E = \{ \text{DiseaseReport}, \text{Dataset}, \text{SciencePaper} \}
+\]
+
+where:
+\subsection{Disease Reports} \( d_r \) is characterized by:
+\begin{itemize}
+    
+    \[
+    \begin{align*}
+    d_r &= \left( \text{disease\_id}, \text{plant\_type}, \text{symptoms}, \text{diagnosis}, \text{treatment}, \right. \\
+    &\left. \text{date\_of\_incident}, \text{latitude}, \text{longitude}, \text{submitted\_by}, \right. \\
+    &\left. \text{notes}, \text{severity}, \text{environmental\_conditions} \right)
+    \end{align*}
+    \]
+\end{itemize}
+These reports facilitate effective disease monitoring and response strategies.
+\subsection{Dataset} \textbf{Dataset} \( d_s \) is characterized by:
+\begin{itemize}
+    \[
+    \begin{align*}
+    d_s &= \left( \text{dataset\_id}, \text{name}, \text{description}, \text{creation\_date}, \right. \\
+    &\left. \text{url}, \text{creator}, \text{data\_format}, \text{size\_bytes}, \right. \\
+    &\left. \text{license}, \text{tags}, \text{version}, \text{data\_sources}, \right. \\
+    &\left. \text{data\_quality\_metrics}, \text{hash\_value} \right)
+    \end{align*}
+    \]
+    \end{itemize}
+    Datasets contain essential data for agricultural research, They support evidence-based research and analysis, ensuring data integrity and reproducibility.
+
+Storing these data types on our blockchain enhances transparency, security, and collaboration in agricultural and scientific communities, fostering innovation and informed decision-making.
+
+\subsection{Science Paper} \textbf{SciencePaper} \( s_p \) is characterized by:
+    \begin{itemize}
+    \[
+    \begin{align*}
+    s_p &= \left( \text{paper\_id}, \text{title}, \text{authors}, \text{abstract}, \right. \\
+    &\left. \text{publication\_date}, \text{journal}, \text{url}, \text{keywords}, \right. \\
+    &\left. \text{citation\_count}, \text{related\_topics}, \text{doi}, \right. \\
+    &\left. \text{research\_field}, \text{methodology} \right)
+    \end{align*}
+    \]
+    Scientific papers stored in the blockchain include research findings on plant diseases, This ensures transparent and traceable dissemination of scholarly information.
+
+\end{itemize}
+
+
+
+
+
+\section{ Main Chain}
+\subsection{ PlantChain}
+ PlantChain  \( \mathcal{PC} \) is a list of blocks:
+
+\[
+\mathcal{PC} = \{ B_0, B_1, \ldots, B_n \}
+\]
+\begin{equation}
+\end{equation}
+where \( B_0 \) is the genesis block.
+
+The genesis block \( B_0 \) is created as:
+
+\[
+B_0 = \text{Block.create\_genesis\_block}(n, d)
+\]
+\begin{equation}
+\end{equation}
+where \( n \) is the name and \( d \) is the description.
+
+\item { Block Hash Calculation}
+
+The hash value \( h \) of a block \( B \) is computed using:
+
+\[
+h = \text{SHA-256}(i \| h_{\text{prev}} \| t \| d \| \text{type} \| k \| c \| \text{desc} \| a)
+\]
+\begin{equation}
+\end{equation}
+where \(\| \) denotes concatenation.
+
+\subsection{ Mining and Genetic Chain Block Creation}
+
+New genetic chain block \( G \):
+\begin{align*}
+c_{\text{data}} & = \text{SHA-256}(\text{block\_data}) \\
+b_{\text{data}} & = \text{binary\_data}(c_{\text{data}}) \\
+s_{\text{dna}} & = \text{tokenize\_to\_dna}(b_{\text{data}}) \\
+G & = \text{GenChainBlock}(i, h_{\text{prev}}, t, s_{\text{dna}}, \text{hash\_value})
+\end{align*}
+\begin{equation}
+\end{equation}
+where \( i \) is the index, \( h_{\text{prev}} \) is the previous hash, \( t \) is the timestamp, \( s_{\text{dna}} \) is the DNA sequence, and \(\text{hash\_value}\) is computed similarly to block hash.
+
+\subsection{ Adding Data Entries}
+
+Adding data entries to the blockchain involves:
+\[
+\text{pending\_data} \leftarrow \text{DataEntry}(e) \text{ for } e \in E
+\]
+\begin{equation}
+\end{equation}
+
+and when mining:
+
+\[
+B_{\text{new}} = \text{Block}(i, h_{\text{prev}}, t, d, \text{type}, k, h, c, \text{desc}, a)
+\]
+\begin{equation}
+\end{equation}
+
+where \( d \) includes data entries from \(\text{pending\_data}\).
+
+\subsection{ Blockchain Validation}
+
+To validate the blockchain:
+
+\begin{align*}
+\text{For } i & = 1 \text{ to } n:
+\begin{cases}
+\text{Check } h_i & = \text{SHA-256}(i \| h_{\text{prev}} \| t \| d \| \text{type} \| k \| c \| \text{desc} \| a) \\
+\text{Check } h_{\text{prev}} & = h_{i-1}
+\end{cases}
+\end{align*}
+\begin{equation}
+\end{equation}
+where \( h_i \) is the hash of the block \( B_i \) and \( h_{\text{prev}} \) is the hash of the previous block.
+
+    
+\section{GenChain}
+
+
+The \texttt{GenChain} is represented as a set \( C \), where each instance \( c \in C \) is a tuple containing the attributes of the class:
+
+\[
+c = \left( n, d, v, \text{chain}, r, t \right)
+\]
+\begin{equation}
+\end{equation}
+
+where:
+\begin{align*}
+n & : \text{name (string)} \in \Sigma^* \\
+d & : \text{description (string)} \in \Sigma^* \\
+v & : \text{version (float)} \in \mathbb{R} \\
+\text{chain} & : \text{list of GenChainBlock} \in \mathcal{P}(G) \\
+r & : \text{running (boolean)} \in \{ \text{True}, \text{False} \} \\
+t & : \text{thread (threading.Thread)} \text{ (optional thread)}
+\end{align*}
+
+Thus, the set \( C \) of all possible GenChain instances is defined as:
+
+\[
+C = \left\{ \left( n, d, v, \text{chain}, r, t \right) \mid n \in \Sigma^*, d \in \Sigma^*, v \in \mathbb{R}, \text{chain} \subseteq G, r \in \{ \text{True}, \text{False} \}, t \text{ optional} \right\}
+\]
+
+\begin{equation}
+\end{equation}
+
+\subsection{Genesis Block}
+
+The genesis block \( b_g \) is defined as:
+
+\[
+b_g = \left( 0, h_0, t_0, s_{\text{dna}}, h_g \right)
+\]
+\begin{equation}
+\end{equation}
+
+Where:
+\begin{align*}
+0 & : \text{index} \\
+h_0 & : \text{previous\_hash} = \emptyset \\
+t_0 & : \text{timestamp} \in \mathbb{R} \text{ (current time)} \\
+s_{\text{dna}} & : \text{dna\_sequence} = \emptyset \\
+h_g & : \text{hash\_value} = \text{computed }
+\end{align*}
+
+The method appends \( b_g \) to the chain.
+
+\subsection {Block Addition} 
+
+The \texttt{add\_block} method appends a block \( b \in G \) to the chain.
+\[
+\text{chain}_{\text{new}} = \text{chain} \cup \{ b \}
+\]
+\begin{equation}
+\end{equation}
+
+
+\subsection{Mine Block}
+The block \( b \) is created as:
+
+\[
+b = \left( i, h_{\text{prev}}, t, s_{\text{dna}}, h \right)
+\]
+\begin{equation}
+\end{equation}
+
+Where:
+\begin{align*}
+i & : \text{index} = \text{len(chain)} \\
+h_{\text{prev}} & : \text{previous\_hash} \\
+t & : \text{timestamp} \in \mathbb{R} \text{ (current time)} \\
+s_{\text{dna}} & : \text{dna\_sequence} = \text{tokenize\_to\_dna}(\text{block\_data}) \\
+h & : \text{hash\_value} = \text{hash\_block}(i, h_{\text{prev}}, t, s_{\text{dna}})
+\end{align*}
+
+\subsection{Block Hashing}
+
+The \texttt{hash\_block}  computes the hash value for a block:
+
+\[
+h = H(i, h_{\text{prev}}, t, s_{\text{dna}})
+\]
+\begin{equation}
+\end{equation}
+Where:
+
+\[
+H(x) = \text{SHA-256}(x)
+\]
+
+and:
+
+\[
+x = \text{str}(i) + h_{\text{prev}} + \text{str}(t) + s_{\text{dna}}
+\]
+\begin{equation}
+\end{equation}
+
+\subsection{{Binary to DNA} }
+
+Converting the block binary representation to a DNA sequence:
+
+\[
+s_{\text{dna}} = \text{convert\_binary\_to\_dna}(\text{binary\_data})
+\]
+\begin{equation}
+\end{equation}
+
+\[
+\text{B2DNA}(block binary ) = \left\{ 
+\begin{aligned}
+&\text{"00"} &\mapsto A \\
+&\text{"01"} &\mapsto C \\
+&\text{"10"} &\mapsto G \\
+&\text{"11"} &\mapsto T 
+\end{aligned}
+\right\}
+\]
 
 Where:
 
-\begin{align}
-\Sigma_0(x) &= \text{ROTR}^2(x) \oplus \text{ROTR}^{13}(x) \oplus \text{ROTR}^{22}(x) \\
-\Sigma_1(x) &= \text{ROTR}^6(x) \oplus \text{ROTR}^{11}(x) \oplus \text{ROTR}^{25}(x) \\
-\text{Ch}(x,y,z) &= (x \land y) \oplus (\neg x \land z) \\
-\text{Maj}(x,y,z) &= (x \land y) \oplus (x \land z) \oplus (y \land z)
-\end{align}
+\[
+\text{binary\_data} = \text{concat}\left(\text{format}(c, '08b') \text{ for } c \text{ in data}\right)
+\]
 
-\subsection{Final Hash Value}
+\subsection{List Blocks} 
 
-Concatenate the outputs of each compression function to obtain the final hash value:
+\[
+\text{block\_summaries} = \left\{ \text{summary}(b) \mid b \in \text{chain}[start\_index:] \right\}
+\]
 
-\begin{equation}
-\text{Final Hash Value} = H_0^n \parallel H_1^n \parallel H_2^n \parallel H_3^n \parallel H_4^n \parallel H_5^n \parallel H_6^n \parallel H_7^n
-\end{equation}
+Where:
+
+\[
+\text{summary}(b) = \left\{ 
+\begin{aligned}
+&\text{"index"} &\mapsto b.index, \\
+&\text{"timestamp"} &\mapsto \text{format\_timestamp}(b.timestamp), \\
+&\text{"dna\_sequence"} &\mapsto b.dna\_sequence, \\
+&\text{"previous\_hash"} &\mapsto b.previous\_hash, \\
+&\text{"hash"} &\mapsto b.hash
+\end{aligned}
+\right\}
+\]
 
 
-\section{Blockchain Components}
-
-\subsection{Blockchain}
-
-The \texttt{Blockchain} serves as the core framework for securely managing data operations within the system.such as plant diseases, scientific research, and beneficial datasets. The chain is meticulously designed to user contributions, enabling the reporting of plant diseases, submission of plant-related research, and sharing datasets crucial for biologists and plant scientists . This ensures a robust platform for collaborative knowledge exchange and comprehensive plant science advancements.
-
-\subsubsection{Functionality}
-
-\begin{itemize}
-    \item **Chain Operations**: The \texttt{Blockchain} facilitates seamless block management operations, including block creation, validation, and chain traversal. Each block in the chain is linked sequentially, with each block containing a cryptographic hash of the previous block, ensuring the integrity of the entire chain.
-    
-    \item **Data Storage**: It provides robust mechanisms for storing diverse data types such as disease reports, scientific papers, datasets, and translated genetic information. Each block within the chain can encapsulate multiple data entries, allowing for efficient and organized data management.
-    
-    \item **Cryptographic Validation**: Utilizing cryptographic methods such as SHA-256 hashing and RSA encryption, the \texttt{Blockchain} class ensures that each block's contents are securely hashed and validated. This cryptographic validation guarantees the authenticity and immutability of stored data, preventing tampering and unauthorized modifications.
-    
-    \item **Continuous Block Generation**: Through continuous block generation, the \texttt{Blockchain} class supports the dynamic addition of new data entries to the chain. This feature enables real-time data updates and enhances the chain's utility in applications requiring up-to-date information, such as disease surveillance and research collaborations.
-    
-    \item **B2DNA**: The system includes a unique feature serves as alternative chain  called the GenChain, which tokenizes binary data into DNA sequences. This process, we call it B2DNA, facilitates the storage of potentially billions of data entries in a highly compact and efficient manner on the GenChain. By converting binary data into DNA sequences, the GenChain enhances data storage capabilities, ensuring that vast amounts of information can be preserved and accessed securely.
-    
-\end{itemize}
-
-\section{Components}
-
-\begin{itemize}
-    \item **Block (\texttt{Block})**: Each block within the \texttt{Blockchain} is represented by the \texttt{Block} class, encapsulating essential attributes such as index, previous hash, timestamp, data entries, block type, public keys, hash value, creator identifier, description, and additional metadata. These attributes collectively ensure comprehensive tracking and verification of data transactions within the chain.
-    
-    \[
-    \begin{aligned}
-    & \text{index} & : & \quad \text{Integer index of the block within the blockchain} \\
-    & \text{previous\_hash} & : & \quad \text{Hash value of the preceding block in the chain} \\
-    & \text{timestamp} & : & \quad \text{Unix timestamp indicating the block's creation time} \\
-    & \text{data} & : & \quad \text{List of data entries (e.g., DiseaseReport, SciencePaper, Dataset)} \\
-    & \text{block\_type} & : & \quad \text{Type of the block (e.g., 'genesis', 'data')} \\
-    & \text{public\_keys} & : & \quad \text{List of public keys associated with data in the block} \\
-    & \text{hash\_value} & : & \quad \text{Hash value computed for the entire block} \\
-    & \text{creator} & : & \quad \text{Identifier of the block's creator or miner} \\
-    & \text{description} & : & \quad \text{Optional description providing additional context} \\
-    & \text{additional\_info} & : & \quad \text{Dictionary for storing supplementary metadata} \\
-    \end{aligned}
-    \]
-
-    \item {GenChain }
-
-    The \texttt{GenChain} class specializes in storing and authenticating genetic data within the blockchain, utilizing SHA-256 hashing and DNA sequence conversion.
-
-    \item {GenChainBlock }
-
-    The \texttt{GenChainBlock} class manages genetic data entries within the \texttt{GenChain}, storing DNA sequences and ensuring data integrity.
-
-    \[
-    \begin{aligned}
-    & \text{index} & : & \quad \text{Index of the block within the GenChain sequence} \\
-    & \text{previous\_hash} & : & \quad \text{Hash of the preceding block in the GenChain} \\
-    & \text{timestamp} & : & \quad \text{Timestamp indicating the block's creation time} \\
-    & \text{dna\_sequence} & : & \quad \text{Sequence of DNA derived from binary data} \\
-    & \text{hash} & : & \quad \text{Hash value computed for the current block} \\
-    \end{aligned}
-    \]
 
     
     \item **GenChain Integration**: The \texttt{Blockchain} optionally integrates with \texttt{GenChain}, a component that tokenizes binary data into DNA sequences. This B2DNA (Binary to DNA) process allows for highly compact and efficient data storage. By converting binary data into DNA sequences, the \texttt{GenChain} can potentially store billions of data entries securely. The \texttt{GenChain} continuously mines new blocks and adds them to its chain, enhancing the overall data storage capacity and ensuring the preservation of vast amounts of information.
@@ -237,34 +620,16 @@ The \texttt{Blockchain} class finds diverse applications across industries, incl
 
     \item **Scientific Research**: Enhancing transparency and reproducibility in plant science studies by securely storing and sharing research findings, datasets, and peer-reviewed publications. Blockchain's immutable ledger enables verifiable citations and intellectual property protection, fostering trust and collaboration within the scientific community.
 
-    \item **Supply Chain in Agriculture**: Providing transparency and traceability in agricultural supply chain management by recording transactional data, product provenance, and compliance certificates. Blockchain mitigates fraud, counterfeit products, and enhances supply chain efficiency and accountability, ensuring the quality and authenticity of agricultural products.
 
-    \item **Genetic Data Storage**: Specialized applications include the storage and authentication of genetic data within the \texttt{GenChain} framework. The B2DNA (Binary to DNA) process tokenizes binary data into DNA sequences, allowing efficient and compact storage of potentially billions of data entries over the time . Blockchain ensures the integrity of genetic sequences, supports genetic storage collaborations.
+
+    \item **Genetic Data Storage**: Simple specialized applications include the storage and authentication of genetic data within the \texttt{GenChain} framework. The B2DNA (Binary to DNA) process tokenizes binary data into DNA sequences, allowing efficient and compact storage of potentially billions of data entries over the time . Blockchain ensures the integrity of genetic sequences, supports genetic storage collaborations.
 \end{itemize}
 
-
-\section{Data Management in the Blockchain}
-
-Our blockchain framework securely manages diverse data types critical for agricultural and scientific research. This includes detailed disease reports, scientific papers, and datasets, each structured to ensure integrity and accessibility.
-
-\subsection{Disease Reports}
-
-Disease reports provide comprehensive insights into plant health, detailing disease identifiers, plant types, symptoms, diagnosis, treatments, incident dates, geographic coordinates, submitters, notes, severity, and environmental conditions. These reports facilitate effective disease monitoring and response strategies.
-
-\subsection{Scientific Papers}
-
-Scientific papers stored in the blockchain include research findings on plant diseases, treatments, and agricultural studies. Each paper features identifiers, titles, authors, abstracts, publication dates, journals, URLs, keywords, citation counts, related topics, DOIs, research fields, methodologies, and additional attributes. This ensures transparent and traceable dissemination of scholarly information.
-
-\subsection{Datasets}
-
-Datasets contain essential data for agricultural research, including identifiers, names, descriptions, creation dates, URLs, creators, formats, sizes, licenses, tags, versions, data sources, quality metrics, and hash values. They support evidence-based research and analysis, ensuring data integrity and reproducibility.
-
-Storing these data types on our blockchain enhances transparency, security, and collaboration in agricultural and scientific communities, fostering innovation and informed decision-making.
 
 
 \section{Conclusion}
 
-This paper has presented a comprehensive exploration of blockchain technology's application in secure data management, with a specific focus on integrating genetic data storage. By leveraging Python and employing SHA-256 hashing for cryptographic security, our framework ensures data integrity, transparency, and immutability across diverse applications such as healthcare, scientific research, and data-intensive domains.
+This paper has presented a comprehensive exploration of blockchain technology's application in secure data management, with a specific focus on integrating genetic data storage. By leveraging Python and employing SHA-256 hashing for cryptographic security, our framework ensures data integrity, transparency, and immutability across diverse applications such as Plants care, scientific research, and data-intensive domains.
 
 The implementation of RSA cryptography for data validation underscores our commitment to secure data handling practices, enhancing trust and reliability within the blockchain structure. Furthermore, the introduction of the B2DNA approach facilitates efficient storage of genetic sequences, showcasing our innovative approach to long-term data preservation.
 
